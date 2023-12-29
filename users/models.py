@@ -22,7 +22,7 @@ from stdimage import StdImageField
 
 
 def validate_username_user(username):
-    pattern = re.compile("^(?=[a-zA-Z0-9._]{3,20}$)(?!.*[_.]{2})[^_.].*[^_.]$")
+    pattern = re.compile("^(?=[a-zA-Z0-9\u0600-\u06FF._]{3,20}$)(?!.*[_.]{2})[^_.].*[^_.]$")
     if pattern.match(username):
         return username
     else:
