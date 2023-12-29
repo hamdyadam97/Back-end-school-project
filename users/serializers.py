@@ -1,42 +1,107 @@
 # users/serializers.py
+from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
+from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
-from .models import User, Student, Parent
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+# from .models import User, Student, Parent
+from .models import User, Parent, Student, Countries
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
+from .task import validate_egyptian_phone_number
 
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, style={"input_type": "password"})
+class SignupSerializer(serializers.ModelSerializer):
+    is_update = False
+    refresh = serializers.CharField(read_only=True, source='token')
+    access = serializers.CharField(read_only=True, source='token.access_token')
 
-    class Meta:
-        model = User
-        fields = [
-            "id",
-            "username",
-            "email",
-            "password",
-            "first_name",
-            "last_name",
-            "image",
-            "role",
-            "telephone",
-            "gender",
-            "birthday",
-            "address",
-            "country",
-            "marital_status",
-        ]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not kwargs.get('data', {}).get('phone_number'):
+            self.fields['email'].required = True
+
+    def validate_password(self, data):
+        validate_password(data)
+        return data
+
+    def validate_email(self, data):
+        users = User.objects.filter(email__iexact=data)
+
+        if self.is_update:
+            users.exclude(id=self.instance.id)
+
+        if users.exists():
+            raise serializers.ValidationError(_("This email address already exists."))
+        return data
+
+    def validate_username(self, data):
+        users = User.objects.filter(username__iexact=data)
+
+        if self.is_update:
+            users = users.exclude(id=self.instance.id)
+
+        if users.exists():
+            raise serializers.ValidationError(_("This username already exists."))
+        return data
+
+
+    def validate(self, attrs):
+        if 'phone_number' in attrs:
+            if 'phone_number' in attrs and not attrs.get('phone_number').isnumeric() or not validate_egyptian_phone_number(attrs['phone_number']):
+                raise serializers.ValidationError(
+                    {'error': "This phone number is invalid, please enter valid phone number."})
+                users = User.objects.filter(phone_number__iexact=attrs['phone_number'])
+                if users.exists():
+                    raise serializers.ValidationError({'error': "This phone number already exists."})
+        return attrs
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
 
-    def validate_email(self, value):
-        """
-        Validate that the email address is unique.
-        """
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("This email address is already in use.")
-        return value
+    class Meta:
+        model = User
+        fields = (
+
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'phone_number',
+            'is_email_verified',
+            'email_verification_code',
+            'dob',
+            'gender',
+            'role',
+            'address',
+            'country',
+            'marital_status',
+            'is_active',
+            'is_deactivated',
+            'date_joined',
+            'last_online',
+            'last_active',
+            'is_phone_verified',
+            'access',
+            'refresh',
+        )
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'dob': {'required': True},
+            'gender': {'required': True},
+        }
+
+class UserLoginSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        try:
+            super().validate(attrs)
+        except AuthenticationFailed as ex:
+            raise serializers.ValidationError(_("Incorrect email or password"))
+        return SignupSerializer(instance=self.user, context=self.context).data
 
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -62,3 +127,19 @@ class ParentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Parent
         fields = '__all__'
+
+
+class CountriesSerializer(serializers.ModelSerializer):
+    country_flag = serializers.ImageField(
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])]
+    )
+
+    class Meta:
+        model = Countries
+        fields = '__all__'
+
+    def validate_name(self, value):
+        # Add any custom validation for the 'name' field
+        if len(value) < 3:
+            raise serializers.ValidationError("Name must be at least 3 characters long.")
+        return value
