@@ -16,6 +16,7 @@ from .task import validate_egyptian_phone_number
 
 class SignupSerializer(serializers.ModelSerializer):
     is_update = False
+    confirm_password = serializers.CharField(write_only=True)
     refresh = serializers.CharField(read_only=True, source='token')
     access = serializers.CharField(read_only=True, source='token.access_token')
 
@@ -23,6 +24,9 @@ class SignupSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
         if not kwargs.get('data', {}).get('phone_number'):
             self.fields['email'].required = True
+
+
+
 
     def validate_password(self, data):
         validate_password(data)
@@ -50,6 +54,10 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
     def validate(self, attrs):
+        password = attrs.get('password')
+        confirm_password = attrs.get('confirm_password')
+        if password and confirm_password and password != confirm_password:
+            raise serializers.ValidationError("Passwords do not match.")
         if 'phone_number' in attrs:
             if 'phone_number' in attrs and not attrs.get('phone_number').isnumeric() or not validate_egyptian_phone_number(attrs['phone_number']):
                 raise serializers.ValidationError(
@@ -66,7 +74,8 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-
+            "password",
+            "confirm_password",
             'username',
             'first_name',
             'last_name',

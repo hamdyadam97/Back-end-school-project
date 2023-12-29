@@ -180,3 +180,65 @@ class Teacher(models.Model):
 
     def __str__(self):
         return self.user.get_full_name() or self.user.username
+
+
+class Profile(models.Model):
+    class EducationalStageChoice(models.TextChoices):
+        PRIMARY_EDUCATION = 'primary_education','Primary education'
+        SECONDARY_EDUCATION = 'secondary_education'
+        HIGH_SCHOOL = 'High_school','High school'
+        TECHNICAL_EDUCATION = 'Technical_education','Technical education'
+        UNIVERSITY_EDUCATION = 'University_education','University education'
+
+    class TYPEOFEDUCATIONChoice(models.TextChoices):
+        GOVERNMENT_EDUCATION = 'government_education','Government education'
+        ARABIC_PRIVATE_EDUCATION = 'arabic_private_education','Arabic private education'
+        FOREIGN_PRIVATE_EDUCATION = 'foreign_private_school','foreign privat eschool'
+    Educational_qualification = models.CharField(blank=True,null=True,help_text="المؤهل العلمي",max_length=50)
+    Graduation_Year = models.DateField(blank=True,null=True,max_length=50,help_text=" سنة التخرج ")
+    The_university_issued_the_qualification = models.CharField(max_length=50,blank=True,null=True,help_text="الجامعة الصادر منها المؤهل")
+    Nationality = models.CharField(max_length=50,blank=True,null=True,help_text="الجنسية")
+    Place_of_residence = models.CharField(max_length=50,blank=True,null=True,help_text="مكان الاقامة")
+    Name_of_previous_or_current_workplace = models.CharField(max_length=50,blank=True,null=True,help_text=" اسم مكان العمل السابق او مكان العمل الحالى")
+    Specialization = models.CharField(max_length=50,blank=True, null=True, help_text=" التخصص")
+    Years_of_Experience = models.CharField(max_length=50,blank=True, null=True, help_text="سنوات الخبرة ")
+    Years_of_experience_in_online_education = models.CharField(max_length=50,blank=True, null=True,help_text="سنوات الخبرة ف التعليم الاؤنلاين")
+    The_training_courses_you_took = models.CharField(max_length=50,blank=True, null=True, help_text=" الدورات الحاصل عليها")
+    Educational_stage = models.CharField(max_length=50,choices=EducationalStageChoice.choices, blank=True, null=True, help_text="مراحل التعليم ")
+    Type_of_education = models.CharField(max_length=50,choices=TYPEOFEDUCATIONChoice.choices, blank=True, null=True, help_text="نوع التعليم")
+    user = models.ForeignKey(User, related_name="user", on_delete=models.CASCADE, null=False, help_text="البروفايل")
+    image = StdImageField(upload_to='profile-image/', blank=True, null=True, variations={
+        'thumbnail': {'width': 1000, 'height': 1000, 'crop': True},
+    })
+
+    def __str__(self):
+        return f' user profile for{self.user.username}'
+
+
+class UserProfileDateRequired(models.Model):
+    Educational_qualification = models.BooleanField(default=False)
+    Graduation_Year = models.BooleanField(default=False)
+    The_university_issued_the_qualification = models.BooleanField(default=False)
+    Nationality = models.BooleanField(default=False)
+    Place_of_residence =models.BooleanField(default=False)
+    Name_of_previous_or_current_workplace = models.BooleanField(default=False)
+    Specialization = models.BooleanField(default=False)
+    Years_of_Experience = models.BooleanField(default=False)
+    Years_of_experience_in_online_education = models.BooleanField(default=False)
+    The_training_courses_you_took = models.BooleanField(default=False)
+    Educational_stage = models.BooleanField(default=False)
+    Type_of_education = models.BooleanField(default=False)
+    image = models.BooleanField(default=False)
+    user = models.OneToOneField(User, related_name="user_profile_permission", on_delete=models.CASCADE, null=False, help_text="البروفايل")
+    file = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f' user profile for{self.user.username}'
+
+
+class FileDateProfileUser(models.Model):
+    profile = models.ForeignKey(Profile,related_name="profile_File",on_delete=models.CASCADE)
+    file = models.FileField(upload_to='profile-file/',help_text="ارفع فايل")
+
+    def __str__(self):
+        return f' user profile file for{self.profile.user.username}'
