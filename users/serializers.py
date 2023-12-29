@@ -59,7 +59,10 @@ class SignupSerializer(serializers.ModelSerializer):
         if password and confirm_password and password != confirm_password:
             raise serializers.ValidationError("Passwords do not match.")
         if 'phone_number' in attrs:
-            if 'phone_number' in attrs and not attrs.get('phone_number').isnumeric() or not validate_egyptian_phone_number(attrs['phone_number']):
+            print(attrs.get('phone_number'))
+            print(attrs.get('phone_number').isnumeric() )
+            print(validate_egyptian_phone_number(attrs['phone_number']))
+            if not attrs.get('phone_number').isnumeric() or validate_egyptian_phone_number(attrs['phone_number']):
                 raise serializers.ValidationError(
                     {'error': "This phone number is invalid, please enter valid phone number."})
                 users = User.objects.filter(phone_number__iexact=attrs['phone_number'])
@@ -68,7 +71,12 @@ class SignupSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
+        confirm_password = validated_data.pop('confirm_password', None)
+        user = super().create(validated_data)
+
+        if confirm_password:
+            user.set_password(confirm_password)
+            user.save()
         return user
 
     class Meta:
