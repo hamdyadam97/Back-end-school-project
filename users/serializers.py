@@ -59,9 +59,6 @@ class SignupSerializer(serializers.ModelSerializer):
         if password and confirm_password and password != confirm_password:
             raise serializers.ValidationError("Passwords do not match.")
         if 'phone_number' in attrs:
-            print(attrs.get('phone_number'))
-            print(attrs.get('phone_number').isnumeric() )
-            print(validate_egyptian_phone_number(attrs['phone_number']))
             if not attrs.get('phone_number').isnumeric() or validate_egyptian_phone_number(attrs['phone_number']):
                 raise serializers.ValidationError(
                     {'error': "This phone number is invalid, please enter valid phone number."})
@@ -85,15 +82,11 @@ class SignupSerializer(serializers.ModelSerializer):
             "password",
             "confirm_password",
             'username',
-
             'email',
             'phone_number',
             'is_email_verified',
             'email_verification_code',
-
             'role',
-
-
             'is_active',
             'is_deactivated',
             'date_joined',
