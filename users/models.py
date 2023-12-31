@@ -20,8 +20,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.conf import settings
 from stdimage import StdImageField
 
-
+"""
+        This is function validation on user name.
+        
+"""
 def validate_username_user(username):
+    # reg to match egyptien phone number
     pattern = re.compile("^(?=[a-zA-Z0-9\u0600-\u06FF._]{3,20}$)(?!.*[_.]{2})[^_.].*[^_.]$")
     if pattern.match(username):
         return username
@@ -30,9 +34,15 @@ def validate_username_user(username):
                               "characters, numbers, or special characters (_.), but not at the beginning or end.")
 
 
+# make user generate key in token with username and
 class UserManager(DjangoUserManager):
     def get_by_natural_key(self, username):
         return self.get(**{f'{self.model.USERNAME_FIELD}__iexact': username})
+
+
+""" 
+country model that user have address
+"""
 
 
 class Countries(models.Model):
@@ -71,18 +81,18 @@ class User(AbstractBaseUser, PermissionsMixin):
             'unique': _("This username already exists."),
         },
     )
-    first_name = models.CharField(max_length=150)
-    last_name = models.CharField(max_length=150)
+    # first_name = models.CharField(max_length=150)
+    # last_name = models.CharField(max_length=150)
     email = models.EmailField(_('email address'),unique=True)
     phone_number = models.CharField(max_length=50, blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
     email_verification_code = models.CharField(max_length=20, blank=True, null=True)
-    dob = models.DateField(null=True)
-    gender = models.CharField(max_length=25, choices=UserGenderChoices.choices, blank=True, null=True)
+    # dob = models.DateField(null=True)
+    # gender = models.CharField(max_length=25, choices=UserGenderChoices.choices, blank=True, null=True)
     role = models.CharField(max_length=10, choices=UserRoleChoices.choices, help_text='دور المستخدم')
-    address = models.TextField(default=None, blank=True, null=True)
-    country = models.ForeignKey(Countries, on_delete=models.SET_NULL, null=True, blank=True)
-    marital_status = models.CharField(max_length=50, blank=True, null=True)
+    # address = models.TextField(default=None, blank=True, null=True)
+    # country = models.ForeignKey(Countries, on_delete=models.SET_NULL, null=True, blank=True)
+    # marital_status = models.CharField(max_length=50, blank=True, null=True)
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,

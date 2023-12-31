@@ -85,18 +85,15 @@ class SignupSerializer(serializers.ModelSerializer):
             "password",
             "confirm_password",
             'username',
-            'first_name',
-            'last_name',
+
             'email',
             'phone_number',
             'is_email_verified',
             'email_verification_code',
-            'dob',
-            'gender',
+
             'role',
-            'address',
-            'country',
-            'marital_status',
+
+
             'is_active',
             'is_deactivated',
             'date_joined',
@@ -108,8 +105,7 @@ class SignupSerializer(serializers.ModelSerializer):
         )
         extra_kwargs = {
             'password': {'write_only': True},
-            'dob': {'required': True},
-            'gender': {'required': True},
+
         }
 
 class UserLoginSerializer(TokenObtainPairSerializer):
