@@ -81,18 +81,11 @@ class User(AbstractBaseUser, PermissionsMixin):
             'unique': _("This username already exists."),
         },
     )
-    # first_name = models.CharField(max_length=150)
-    # last_name = models.CharField(max_length=150)
     email = models.EmailField(_('email address'),unique=True)
     phone_number = models.CharField(max_length=50, blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
     email_verification_code = models.CharField(max_length=20, blank=True, null=True)
-    # dob = models.DateField(null=True)
-    # gender = models.CharField(max_length=25, choices=UserGenderChoices.choices, blank=True, null=True)
     role = models.CharField(max_length=10, choices=UserRoleChoices.choices, help_text='دور المستخدم')
-    # address = models.TextField(default=None, blank=True, null=True)
-    # country = models.ForeignKey(Countries, on_delete=models.SET_NULL, null=True, blank=True)
-    # marital_status = models.CharField(max_length=50, blank=True, null=True)
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
@@ -156,7 +149,7 @@ class Student(models.Model):
     student_name = models.CharField(max_length=255)
     class_name = models.CharField(max_length=50)
     mobile_phone_number = models.CharField(max_length=15)
-    parents = models.ManyToManyField(User, related_name='children', limit_choices_to={'role': 'parent'})
+    parents = models.ManyToManyField(User, related_name='children')
 
     def __str__(self):
         return self.student_name
@@ -167,7 +160,7 @@ class Parent(models.Model):
     Parent_name = models.CharField(max_length=255, blank=True, null=True)
     Parent_phone = models.CharField(max_length=15, blank=True, null=True)
     Parent_occupation = models.CharField(max_length=255, blank=True, null=True)
-    children = models.ManyToManyField(Student, related_name='student', limit_choices_to={'role': 'student'})
+    # children = models.ManyToManyField(Student, related_name='student', )
 
     def __str__(self):
         return self.Parent_name or str(self.user)
@@ -201,21 +194,21 @@ class Profile(models.Model):
         UNIVERSITY_EDUCATION = 'University_education','University education'
 
     class TYPEOFEDUCATIONChoice(models.TextChoices):
-        GOVERNMENT_EDUCATION = 'government_education','Government education'
-        ARABIC_PRIVATE_EDUCATION = 'arabic_private_education','Arabic private education'
-        FOREIGN_PRIVATE_EDUCATION = 'foreign_private_school','foreign privat eschool'
-    Educational_qualification = models.CharField(blank=True,null=True,help_text="المؤهل العلمي",max_length=50)
-    Graduation_Year = models.DateField(blank=True,null=True,max_length=50,help_text=" سنة التخرج ")
-    The_university_issued_the_qualification = models.CharField(max_length=50,blank=True,null=True,help_text="الجامعة الصادر منها المؤهل")
-    Nationality = models.CharField(max_length=50,blank=True,null=True,help_text="الجنسية")
-    Place_of_residence = models.CharField(max_length=50,blank=True,null=True,help_text="مكان الاقامة")
-    Name_of_previous_or_current_workplace = models.CharField(max_length=50,blank=True,null=True,help_text=" اسم مكان العمل السابق او مكان العمل الحالى")
-    Specialization = models.CharField(max_length=50,blank=True, null=True, help_text=" التخصص")
-    Years_of_Experience = models.CharField(max_length=50,blank=True, null=True, help_text="سنوات الخبرة ")
-    Years_of_experience_in_online_education = models.CharField(max_length=50,blank=True, null=True,help_text="سنوات الخبرة ف التعليم الاؤنلاين")
-    The_training_courses_you_took = models.CharField(max_length=50,blank=True, null=True, help_text=" الدورات الحاصل عليها")
-    Educational_stage = models.CharField(max_length=50,choices=EducationalStageChoice.choices, blank=True, null=True, help_text="مراحل التعليم ")
-    Type_of_education = models.CharField(max_length=50,choices=TYPEOFEDUCATIONChoice.choices, blank=True, null=True, help_text="نوع التعليم")
+        GOVERNMENT_EDUCATION = 'government_education', 'Government education'
+        ARABIC_PRIVATE_EDUCATION = 'arabic_private_education', 'Arabic private education'
+        FOREIGN_PRIVATE_EDUCATION = 'foreign_private_school', 'foreign privat eschool'
+    Educational_qualification = models.CharField(blank=True, null=True, help_text="المؤهل العلمي", max_length=50)
+    Graduation_Year = models.DateField(blank=True, null=True, max_length=50, help_text=" سنة التخرج ")
+    The_university_issued_the_qualification = models.CharField(max_length=50, blank=True, null=True, help_text="الجامعة الصادر منها المؤهل")
+    Nationality = models.CharField(max_length=50, blank=True, null=True, help_text="الجنسية")
+    Place_of_residence = models.CharField(max_length=50, blank=True, null=True, help_text="مكان الاقامة")
+    Name_of_previous_or_current_workplace = models.CharField(max_length=50, blank=True, null=True, help_text=" اسم مكان العمل السابق او مكان العمل الحالى")
+    Specialization = models.CharField(max_length=50, blank=True, null=True, help_text=" التخصص")
+    Years_of_Experience = models.CharField(max_length=50, blank=True, null=True, help_text="سنوات الخبرة ")
+    Years_of_experience_in_online_education = models.CharField(max_length=50, blank=True, null=True, help_text="سنوات الخبرة ف التعليم الاؤنلاين")
+    The_training_courses_you_took = models.CharField(max_length=50, blank=True, null=True, help_text=" الدورات الحاصل عليها")
+    Educational_stage = models.CharField(max_length=50, choices=EducationalStageChoice.choices, blank=True, null=True, help_text="مراحل التعليم ")
+    Type_of_education = models.CharField(max_length=50, choices=TYPEOFEDUCATIONChoice.choices, blank=True, null=True, help_text="نوع التعليم")
     user = models.ForeignKey(User, related_name="user", on_delete=models.CASCADE, null=False, help_text="البروفايل")
     image = StdImageField(upload_to='profile-image/', blank=True, null=True, variations={
         'thumbnail': {'width': 1000, 'height': 1000, 'crop': True},
@@ -230,7 +223,7 @@ class UserProfileDateRequired(models.Model):
     Graduation_Year = models.BooleanField(default=False)
     The_university_issued_the_qualification = models.BooleanField(default=False)
     Nationality = models.BooleanField(default=False)
-    Place_of_residence =models.BooleanField(default=False)
+    Place_of_residence = models.BooleanField(default=False)
     Name_of_previous_or_current_workplace = models.BooleanField(default=False)
     Specialization = models.BooleanField(default=False)
     Years_of_Experience = models.BooleanField(default=False)

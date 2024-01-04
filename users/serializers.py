@@ -1,12 +1,13 @@
 # users/serializers.py
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import Permission, Group
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.contenttypes.models import ContentType
 from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
-# from .models import User, Student, Parent
+
 from .models import User, Parent, Student, Countries
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -101,6 +102,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
         }
 
+
 class UserLoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         try:
@@ -149,3 +151,28 @@ class CountriesSerializer(serializers.ModelSerializer):
         if len(value) < 3:
             raise serializers.ValidationError("Name must be at least 3 characters long.")
         return value
+
+
+class ContentTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentType
+        fields = '__all__'
+
+
+class PermissionSerializer(serializers.ModelSerializer):
+    content_type_details = ContentTypeSerializer(source='content_type', read_only=True)
+
+    class Meta:
+        model = Permission
+        fields = '__all__'
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ('name','permissions')
+
+
+class UserPermissionUpdateSerializer(serializers.Serializer):
+    user_permissions = serializers.ListField(child=serializers.IntegerField())
+
