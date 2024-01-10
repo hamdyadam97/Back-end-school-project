@@ -3,7 +3,8 @@ from django.conf.urls.static import static
 from django.urls import path
 
 from users.views import UserRegistrationView, LoginView, CountryListCreateView, CountryDetailDeleteUpdateView, \
-    StudentListCreateView, StudentRetrieveUpdateDestroyView, PermissionList, ContentTypeList, GroupPermissionUpdateView
+    StudentListCreateView, StudentRetrieveUpdateDestroyView, PermissionList, ContentTypeList, GroupPermissionUpdateView, \
+    GroupListView
 
 app_name = 'USERS'
 
@@ -16,6 +17,7 @@ urlpatterns = [
     path('countries/<int:id>/', CountryDetailDeleteUpdateView.as_view(), name='country-detail-delete-update'),
     path('permissions/', PermissionList.as_view(), name='permissions-list'),
     path('groups/<int:pk>/permissions/', GroupPermissionUpdateView.as_view(), name='group-permission-update'),
+    path('groups/', GroupListView.as_view(), name='group-list'),
 
 ]
 if settings.DEBUG:

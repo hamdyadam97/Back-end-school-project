@@ -134,3 +134,10 @@ class GroupPermissionUpdateView(UpdateAPIView):
         group= GroupSerializer(group).data
 
         return Response({'detail': 'Group permissions updated successfully.','data':group}, status=status.HTTP_200_OK)
+
+
+class GroupListView(ListAPIView):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]  # Add permission classes
+

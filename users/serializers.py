@@ -168,11 +168,14 @@ class PermissionSerializer(serializers.ModelSerializer):
 
 
 class GroupSerializer(serializers.ModelSerializer):
+    permissions = PermissionSerializer(many=True, read_only=True)
     class Meta:
         model = Group
-        fields = ('name','permissions')
+        fields = ('id','name','permissions')
 
 
 class UserPermissionUpdateSerializer(serializers.Serializer):
     user_permissions = serializers.ListField(child=serializers.IntegerField())
+
+
 
